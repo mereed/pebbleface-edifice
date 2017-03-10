@@ -32,7 +32,7 @@ module.exports = [
         "defaultValue": "0xFF0000",
         "label": "Second Hand Colour"
 	  },
-	  {
+/*	  {
         "type": "toggle",
         "messageKey": "day",
         "label": "Show day",
@@ -43,7 +43,7 @@ module.exports = [
         "messageKey": "date",
         "label": "Show date",
         "defaultValue": true
-      },
+      },*/
 	  {
         "type": "toggle",
         "messageKey": "secs",

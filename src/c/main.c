@@ -161,12 +161,12 @@ static void health_handler(HealthEventType event, void *context) {
 
 static void progress_layer_update_proc(Layer *layer, GContext *ctx) {
   const GRect inset = grect_inset(layer_get_bounds(layer), GEdgeInsets(2));
-#ifdef PBL_COLOR
+//#ifdef PBL_COLOR
   graphics_context_set_fill_color(ctx,
     s_step_count >= s_step_average ? color_winner : color_loser);
-#else
-graphics_context_set_fill_color(ctx, GColorWhite);
-#endif
+//#else
+//graphics_context_set_fill_color(ctx, GColorWhite);
+//#endif
   graphics_fill_radial(ctx, inset, GOvalScaleModeFitCircle, 2,
     DEG_TO_TRIGANGLE(0),
     DEG_TO_TRIGANGLE((360 * s_step_count) / s_step_goal));
@@ -220,7 +220,7 @@ static void set_container_image(GBitmap **bmp_image, BitmapLayer *bmp_layer, con
 static void update_days(struct tm *tick_time) {
   set_container_image(&day_name_image, day_name_layer, DAY_NAME_IMAGE_RESOURCE_IDS[tick_time->tm_wday], GPoint( 40, 50));
   set_container_image(&date_digits_images[0], date_digits_layers[0], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday/10], GPoint(123,125));
-  set_container_image(&date_digits_images[1], date_digits_layers[1], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday%10], GPoint(129,130));
+  set_container_image(&date_digits_images[1], date_digits_layers[1], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday%10], GPoint(129,131));
 
   if (!clock_is_24h_style()) {    
 	  if (tick_time->tm_hour >= 12) {
