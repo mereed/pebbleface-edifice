@@ -5,11 +5,10 @@
 
 // A structure containing our settings
 typedef struct ClaySettings {
-  int background;
+  int day;
   GColor hrcol;
   GColor mincol;
   GColor seccol;
-  bool day;
   bool date;
   bool batt;
   bool secs;

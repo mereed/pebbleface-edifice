@@ -9,7 +9,7 @@ Window* window;
 //LAYER
 Layer* layer;
 
-static Layer *window_layer;
+//static Layer *window_layer;
 
 //BACKGROUND
 static GBitmap* background;
@@ -19,8 +19,10 @@ static BitmapLayer *background_layer;
 bool seconds = true;
 bool date = true;
 
-TextLayer *layer_date_text;
 TextLayer *layer_time_text;
+
+static GFont mini;
+static GFont mini2;
 
 GBitmap *img_battery_10;
 GBitmap *img_battery_9;
@@ -38,13 +40,23 @@ BitmapLayer *layer_batt_img;
 int charge_percent = 0;
 int cur_day = -1;
 
+BitmapLayer *layer_quiettime;                          
+GBitmap *bitmap_quiettime;    
+
 static GBitmap *bluetooth_image;
 static BitmapLayer *bluetooth_layer;
+
 static GBitmap *bluetoothp_image;
 static BitmapLayer *bluetoothp_layer;    
 
 static GBitmap *time_format_image;
 static BitmapLayer *time_format_layer;
+
+static GBitmap *shoe_image;
+static BitmapLayer *shoe_layer;
+
+static GBitmap *stepnum_image;
+static BitmapLayer *stepnum_layer;
 
 #define TOTAL_DATE_DIGITS 2	
 static GBitmap *date_digits_images[TOTAL_DATE_DIGITS];
@@ -63,8 +75,8 @@ const int DATENUM_IMAGE_RESOURCE_IDS[] = {
  RESOURCE_ID_IMAGE_DATENUM_9
 };
 
-static GBitmap *day_name_image;
-static BitmapLayer *day_name_layer;
+static GBitmap *day_image;
+static BitmapLayer *day_layer;
 
 const int DAY_NAME_IMAGE_RESOURCE_IDS[] = {
   RESOURCE_ID_IMAGE_DAY_NAME_SUN,
@@ -124,14 +136,11 @@ static void get_step_average() {
 static void display_step_count() {
   int thousands = s_step_count / 1000;
   int hundreds = s_step_count % 1000;
- // static char s_emoji[5];
 
   if(s_step_count >= s_step_average) {
     text_layer_set_text_color(s_step_layer, color_winner);
-   // snprintf(s_emoji, sizeof(s_emoji), "\U0001F60C");
   } else {
     text_layer_set_text_color(s_step_layer, color_loser);
-  //  snprintf(s_emoji, sizeof(s_emoji), "\U0001F4A9");
   }
 
   if(thousands > 0) {
@@ -161,13 +170,8 @@ static void health_handler(HealthEventType event, void *context) {
 
 static void progress_layer_update_proc(Layer *layer, GContext *ctx) {
   const GRect inset = grect_inset(layer_get_bounds(layer), GEdgeInsets(2));
-//#ifdef PBL_COLOR
-  graphics_context_set_fill_color(ctx,
-    s_step_count >= s_step_average ? color_winner : color_loser);
-//#else
-//graphics_context_set_fill_color(ctx, GColorWhite);
-//#endif
-  graphics_fill_radial(ctx, inset, GOvalScaleModeFitCircle, 2,
+  graphics_context_set_fill_color(ctx, s_step_count >= s_step_average ? color_winner : color_loser);
+  graphics_fill_radial(ctx, inset, GOvalScaleModeFitCircle, 4,
     DEG_TO_TRIGANGLE(0),
     DEG_TO_TRIGANGLE((360 * s_step_count) / s_step_goal));
 }
@@ -187,13 +191,11 @@ static void average_layer_update_proc(Layer *layer, GContext *ctx) {
     trigangle - line_width_trigangle, trigangle);
 }
 
-
-
 // Initialize the default settings
 static void prv_default_settings() {	
   settings.date = true;
   settings.secs = true;
-  settings.day = false;
+  settings.day = 1;
   settings.hrcol = GColorWhite;
   settings.mincol = GColorWhite;
   settings.seccol = GColorRed;
@@ -218,34 +220,39 @@ static void set_container_image(GBitmap **bmp_image, BitmapLayer *bmp_layer, con
 }
 
 static void update_days(struct tm *tick_time) {
-  set_container_image(&day_name_image, day_name_layer, DAY_NAME_IMAGE_RESOURCE_IDS[tick_time->tm_wday], GPoint( 40, 50));
-  set_container_image(&date_digits_images[0], date_digits_layers[0], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday/10], GPoint(123,125));
-  set_container_image(&date_digits_images[1], date_digits_layers[1], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday%10], GPoint(129,131));
-
+#ifdef PBL_PLATFORM_CHALK
+  set_container_image(&day_image, day_layer, DAY_NAME_IMAGE_RESOURCE_IDS[tick_time->tm_wday], GPoint( 35, 84));
+  set_container_image(&date_digits_images[0], date_digits_layers[0], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday/10], GPoint(123,124));
+  set_container_image(&date_digits_images[1], date_digits_layers[1], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday%10], GPoint(129,130));
+#else
+   set_container_image(&day_image, day_layer, DAY_NAME_IMAGE_RESOURCE_IDS[tick_time->tm_wday], GPoint( 18, 78));
+  set_container_image(&date_digits_images[0], date_digits_layers[0], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday/10], GPoint(106,119));
+  set_container_image(&date_digits_images[1], date_digits_layers[1], DATENUM_IMAGE_RESOURCE_IDS[tick_time->tm_mday%10], GPoint(112,125));
+#endif		
+	
   if (!clock_is_24h_style()) {    
 	  if (tick_time->tm_hour >= 12) {
 		  
 #ifdef PBL_PLATFORM_CHALK
-      set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_PM_MODE, GPoint(62, 126));
+      set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_PM_MODE, GPoint(63, 119));
       layer_set_hidden(bitmap_layer_get_layer(time_format_layer), false);	
 #else
-      set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_PM_MODE, GPoint(120, 44));
+      set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_PM_MODE, GPoint(45, 113));
       layer_set_hidden(bitmap_layer_get_layer(time_format_layer), false);
 #endif		
     } 
     else {
 	  
 #ifdef PBL_PLATFORM_CHALK
-	set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_AM_MODE, GPoint(70, 126));
+	set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_AM_MODE, GPoint(71, 119));
     layer_set_hidden(bitmap_layer_get_layer(time_format_layer), false);			
 #else
-	  set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_AM_MODE, GPoint(120, 44));
+	  set_container_image(&time_format_image, time_format_layer, RESOURCE_ID_IMAGE_AM_MODE, GPoint(53, 113));
       layer_set_hidden(bitmap_layer_get_layer(time_format_layer), false);
 #endif	
     }
   }
 }
-
 
 void update_layer(Layer *me, GContext* ctx) 
 {
@@ -255,7 +262,6 @@ void update_layer(Layer *me, GContext* ctx)
 	time_t temp = time(NULL); 
   	struct tm *tick_time = localtime(&temp);
 	
-	
 	//draw hands
 #ifdef PBL_PLATFORM_CHALK
 	GPoint center = GPoint(90,90);
@@ -263,6 +269,7 @@ void update_layer(Layer *me, GContext* ctx)
 	GPoint center = GPoint(72,84);
 #endif
 
+// second hand
 	if((settings.secs) && (seconds == 1)) {
 	
 		tick_timer_service_subscribe(SECOND_UNIT, tick);
@@ -279,7 +286,6 @@ void update_layer(Layer *me, GContext* ctx)
   graphics_context_set_stroke_width(ctx, 2);
   graphics_context_set_antialiased(ctx, ANTIALIASING);
 
-	
 	// minute hand
 	graphics_context_set_stroke_color(ctx, settings.mincol);
 	gpath_rotate_to(s_minute_arrow, TRIG_MAX_ANGLE * tick_time->tm_min / 60);
@@ -289,7 +295,6 @@ void update_layer(Layer *me, GContext* ctx)
 	graphics_context_set_stroke_color(ctx, settings.hrcol);
 	gpath_rotate_to(s_hour_arrow, (TRIG_MAX_ANGLE * (((tick_time->tm_hour % 12) * 6) + (tick_time->tm_min / 10))) / (12 * 6)); // from Pebble SDK example
 	gpath_draw_outline(ctx, s_hour_arrow);
-	
 	
     graphics_context_set_fill_color(ctx, GColorBlack);
 	graphics_fill_circle(ctx, center, 6);
@@ -317,20 +322,33 @@ static void prv_save_settings() {
 // Update the display elements
 static void prv_update_display() {
 	
-	if (settings.date){
-	  for (int i = 0; i < TOTAL_DATE_DIGITS; ++i) {
-		  layer_set_hidden(bitmap_layer_get_layer(date_digits_layers[i]), false);
-	  }
-	} else {
-	  for (int i = 0; i < TOTAL_DATE_DIGITS; ++i) {
-		  layer_set_hidden(bitmap_layer_get_layer(date_digits_layers[i]), true);
-	  }
-	}
-	
-	if (settings.day){
-		  layer_set_hidden(bitmap_layer_get_layer(day_name_layer), false);
-	} else {
-		  layer_set_hidden(bitmap_layer_get_layer(day_name_layer), true);		
+	switch(settings.day) {
+		
+	case 0:  // 
+	    
+		layer_set_hidden(bitmap_layer_get_layer(shoe_layer), false);
+		layer_set_hidden(bitmap_layer_get_layer(stepnum_layer), false);
+		layer_set_hidden(text_layer_get_layer(s_step_layer), false);
+		layer_set_hidden((s_progress_layer), false);
+		layer_set_hidden((s_average_layer), false);	
+		
+		layer_set_hidden(bitmap_layer_get_layer(day_layer), true);
+		layer_set_hidden(text_layer_get_layer(layer_time_text), true);
+		
+	    break;		
+		
+	case 1:  // 
+
+		layer_set_hidden(bitmap_layer_get_layer(shoe_layer), true);
+		layer_set_hidden(bitmap_layer_get_layer(stepnum_layer), true);
+		layer_set_hidden(text_layer_get_layer(s_step_layer), true);
+		layer_set_hidden((s_progress_layer), true);
+		layer_set_hidden((s_average_layer), true);
+			
+		layer_set_hidden(bitmap_layer_get_layer(day_layer), false);
+		layer_set_hidden(text_layer_get_layer(layer_time_text), false);
+		
+	    break;		
 	}
 }
 
@@ -351,17 +369,11 @@ int stringToInt(char *str){
 
 // Handle the response from AppMessage
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
-	
-  // background
-  Tuple *bg_t = dict_find(iter, MESSAGE_KEY_background);
-  if (bg_t) {
-    settings.background = stringToInt((char*) bg_t->value->data);
-  }
 
  // day
   Tuple *day_t = dict_find(iter, MESSAGE_KEY_day);
   if (day_t) {
-    settings.day = day_t->value->int32 == 1;
+    settings.day = stringToInt((char*) day_t->value->data);
   }
 	
  // date
@@ -452,13 +464,26 @@ void bluetooth_connection_callback(bool connected) {
 
 void tick(struct tm *tick_time, TimeUnits units_changed) {	
 
+     layer_set_hidden(bitmap_layer_get_layer(layer_quiettime), !quiet_time_is_active());
+
 	//redraw every tick
 	layer_mark_dirty(layer);
 	
 	 if (units_changed & HOUR_UNIT) {
     update_days(tick_time);
+	 }
+		   static char time_buffer[] = "00:00";
+		 
+//get digital time
+	
+	 if (clock_is_24h_style()) {
+		   strftime(time_buffer, 8, "%R", tick_time);
+    } else {
+		   strftime(time_buffer, 8, "%l:%M", tick_time);
+    }	 
+  text_layer_set_text(layer_time_text, time_buffer);
+		 	 
   }
-}
 
 
 void init() {
@@ -488,6 +513,8 @@ void init() {
   bitmap_layer_set_bitmap(background_layer, background);
   layer_add_child(window_layer, bitmap_layer_get_layer(background_layer));
 	
+  mini = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MINI_16));
+  mini2 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_MINI_14));
 	
   img_battery_10   = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATT_10);
   img_battery_9    = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATT_9);
@@ -504,7 +531,7 @@ void init() {
 #if PBL_PLATFORM_CHALK	
   layer_batt_img  = bitmap_layer_create(GRect(88, 87, 64, 64));
 #else
-  layer_batt_img  = bitmap_layer_create(GRect(59, 134, 25, 24));
+  layer_batt_img  = bitmap_layer_create(GRect(72, 82, 64, 64));
 #endif
   bitmap_layer_set_bitmap(layer_batt_img, img_battery_3);
   bitmap_layer_set_compositing_mode(layer_batt_img, GCompOpSet);
@@ -513,9 +540,9 @@ void init() {
   bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLUETOOTH);
   GRect bitmap_bounds_bt_on = gbitmap_get_bounds(bluetooth_image);
 #if PBL_PLATFORM_CHALK	
-  GRect frame_bt = GRect(42, 31, bitmap_bounds_bt_on.size.w, bitmap_bounds_bt_on.size.h);
+  GRect frame_bt = GRect(40, 35, bitmap_bounds_bt_on.size.w, bitmap_bounds_bt_on.size.h);
 #else
-  GRect frame_bt = GRect(68, 142, bitmap_bounds_bt_on.size.w, bitmap_bounds_bt_on.size.h);
+  GRect frame_bt = GRect(23, 32, bitmap_bounds_bt_on.size.w, bitmap_bounds_bt_on.size.h);
 #endif
   bluetooth_layer = bitmap_layer_create(frame_bt);
   bitmap_layer_set_bitmap(bluetooth_layer, bluetooth_image);
@@ -524,9 +551,9 @@ void init() {
   bluetoothp_image = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_PLANE);
   GRect bitmap_bounds_btp_on = gbitmap_get_bounds(bluetoothp_image);
 #if PBL_PLATFORM_CHALK	
-  GRect frame_btp = GRect(129, 38, bitmap_bounds_btp_on.size.w, bitmap_bounds_btp_on.size.h);
+  GRect frame_btp = GRect(40, 35, bitmap_bounds_btp_on.size.w, bitmap_bounds_btp_on.size.h);
 #else
-  GRect frame_btp = GRect(68, 142, bitmap_bounds_btp_on.size.w, bitmap_bounds_btp_on.size.h);
+  GRect frame_btp = GRect(23, 32, bitmap_bounds_btp_on.size.w, bitmap_bounds_btp_on.size.h);
 #endif
   bluetoothp_layer = bitmap_layer_create(frame_btp);
   bitmap_layer_set_bitmap(bluetoothp_layer, bluetoothp_image);
@@ -534,9 +561,9 @@ void init() {
  // layer_set_hidden(bitmap_layer_get_layer(bluetoothp_layer), true);
 	
   GRect dummy_frame = { {0, 0}, {0, 0} };	
-  day_name_layer = bitmap_layer_create(dummy_frame);
-  bitmap_layer_set_compositing_mode(day_name_layer, GCompOpSet);
-  layer_add_child(window_layer, bitmap_layer_get_layer(day_name_layer));	
+	
+  day_layer = bitmap_layer_create(dummy_frame);
+  layer_add_child(window_layer, bitmap_layer_get_layer(day_layer));	
 	
 	
   for (int i = 0; i < TOTAL_DATE_DIGITS; ++i) {
@@ -547,36 +574,90 @@ void init() {
   }
 
 #ifdef PBL_PLATFORM_CHALK
-  GRect frame5 = GRect(45, 45, 3,5);
+  GRect frame5 = GRect(0, 0, 3,5);
 #else
   GRect frame5 = GRect(0, 0, 3,5);
 #endif
   time_format_layer = bitmap_layer_create(frame5);
   layer_add_child(window_layer, bitmap_layer_get_layer(time_format_layer));
 	
+  bitmap_quiettime = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ICON_QT);
+#if PBL_PLATFORM_CHALK	
+  layer_quiettime = bitmap_layer_create(GRect(123,39, 19,15));
+#else
+  layer_quiettime = bitmap_layer_create(GRect(104,33, 19,15));
+#endif
+  bitmap_layer_set_bitmap(layer_quiettime,bitmap_quiettime);
+  layer_add_child(window_layer,bitmap_layer_get_layer(layer_quiettime));
+  layer_set_hidden(bitmap_layer_get_layer(layer_quiettime), true);
 	
+  shoe_image = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHOE);
+  GRect bitmap_bounds_shoe = gbitmap_get_bounds(shoe_image);
+#if PBL_PLATFORM_CHALK	
+  GRect frame_shoe = GRect(39, 74, bitmap_bounds_shoe.size.w, bitmap_bounds_shoe.size.h);
+#else
+  GRect frame_shoe = GRect(21, 68, bitmap_bounds_shoe.size.w, bitmap_bounds_shoe.size.h);
+#endif
+  shoe_layer = bitmap_layer_create(frame_shoe);
+  bitmap_layer_set_bitmap(shoe_layer, shoe_image);
+  layer_add_child(window_layer, bitmap_layer_get_layer(shoe_layer));	
 
-
+  stepnum_image = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_NUMSTEPS);
+  GRect bitmap_bounds_stepnum = gbitmap_get_bounds(stepnum_image);
+#if PBL_PLATFORM_CHALK	
+  GRect frame_stepnum = GRect(80, 40, bitmap_bounds_stepnum.size.w, bitmap_bounds_stepnum.size.h);
+#else
+  GRect frame_stepnum = GRect(63, 35, bitmap_bounds_stepnum.size.w, bitmap_bounds_stepnum.size.h);
+#endif
+  stepnum_layer = bitmap_layer_create(frame_stepnum);
+  bitmap_layer_set_bitmap(stepnum_layer, stepnum_image);
+  layer_add_child(window_layer, bitmap_layer_get_layer(stepnum_layer));	
+	
   // Steps Progress indicator
+#if PBL_PLATFORM_CHALK	
   s_progress_layer = layer_create(GRect(29,64,53,53));
+#else
+  s_progress_layer = layer_create(GRect(15,59,53,53));
+#endif 
   layer_set_update_proc(s_progress_layer, progress_layer_update_proc);
   layer_add_child(window_layer, s_progress_layer);
 
   // Steps Average indicator
+#if PBL_PLATFORM_CHALK	
   s_average_layer = layer_create(GRect(29,64,53,53));
+#else
+  s_average_layer = layer_create(GRect(15,59,53,53));
+#endif 
   layer_set_update_proc(s_average_layer, average_layer_update_proc);
   layer_add_child(window_layer, s_average_layer);
 
 
   // Create a layer to hold the current step count text
-  s_step_layer = text_layer_create(
-      GRect(0, 43, 180, 20));
+#if PBL_PLATFORM_CHALK	
+  s_step_layer = text_layer_create(GRect(0, 45, 180, 20));
+#else
+  s_step_layer = text_layer_create(GRect(0, 38, 144, 20));
+#endif 
   text_layer_set_background_color(s_step_layer, GColorClear);
   text_layer_set_text_color(s_step_layer, GColorWhite);
-  text_layer_set_font(s_step_layer,fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
+  text_layer_set_font(s_step_layer,mini2);
+//  text_layer_set_font(s_step_layer,fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
   text_layer_set_text_alignment(s_step_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_step_layer));
 
+	
+#if PBL_PLATFORM_CHALK	
+  layer_time_text = text_layer_create(GRect(0, 43, 180, 30));
+#else
+  layer_time_text = text_layer_create(GRect(0, 36, 144, 30));
+#endif 
+  text_layer_set_background_color(layer_time_text, GColorClear);
+  text_layer_set_text_color(layer_time_text, GColorWhite);
+  text_layer_set_font(layer_time_text,mini);
+  text_layer_set_text_alignment(layer_time_text, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(layer_time_text));
+
+	
 	//create hands layer
 #if PBL_PLATFORM_CHALK	
 	layer = layer_create(GRect(0,0,180,180));
@@ -593,7 +674,6 @@ void init() {
   if(step_data_is_available()) {
     health_service_events_subscribe(health_handler, NULL);
   }
-	
 	
   toggle_bluetooth_icon(bluetooth_connection_service_peek());
   update_battery_state(battery_state_service_peek());
@@ -625,10 +705,19 @@ void init() {
 
 static void deinit(void) {
 
-	layer_destroy(layer);
+  tick_timer_service_unsubscribe();
+  bluetooth_connection_service_unsubscribe();
+  battery_state_service_unsubscribe();
+  health_service_events_unsubscribe();
 	
-	bluetooth_connection_service_unsubscribe();
-    battery_state_service_unsubscribe();
+  layer_destroy(layer);
+  layer_destroy(s_average_layer);
+  layer_destroy(s_progress_layer);
+  text_layer_destroy(s_step_layer);
+  text_layer_destroy(layer_time_text);
+	
+  fonts_unload_custom_font(mini);
+  fonts_unload_custom_font(mini2);
 	
   layer_remove_from_parent(bitmap_layer_get_layer(background_layer));
   bitmap_layer_destroy(background_layer);
@@ -637,15 +726,40 @@ static void deinit(void) {
 		gbitmap_destroy(background);
     }
 	
-	layer_remove_from_parent(bitmap_layer_get_layer(bluetooth_layer));
-    bitmap_layer_destroy(bluetooth_layer);
-    gbitmap_destroy(bluetooth_image);
-    bluetooth_image = NULL;
+  layer_remove_from_parent(bitmap_layer_get_layer(shoe_layer));
+  bitmap_layer_destroy(shoe_layer);
+  gbitmap_destroy(shoe_image);
+  shoe_image = NULL;	
 	
-  layer_remove_from_parent(bitmap_layer_get_layer(day_name_layer));
-  bitmap_layer_destroy(day_name_layer);
-  gbitmap_destroy(day_name_image);
+  layer_remove_from_parent(bitmap_layer_get_layer(bluetooth_layer));
+  bitmap_layer_destroy(bluetooth_layer);
+  gbitmap_destroy(bluetooth_image);
+  bluetooth_image = NULL;
+	
+  layer_remove_from_parent(bitmap_layer_get_layer(bluetoothp_layer));
+  bitmap_layer_destroy(bluetoothp_layer);
+  gbitmap_destroy(bluetoothp_image);
+  bluetoothp_image = NULL;
+	
+  layer_remove_from_parent(bitmap_layer_get_layer(stepnum_layer));
+  bitmap_layer_destroy(stepnum_layer);
+  gbitmap_destroy(stepnum_image);
+  stepnum_image = NULL;	
+	
+  layer_remove_from_parent(bitmap_layer_get_layer(time_format_layer));
+  bitmap_layer_destroy(time_format_layer);
+  gbitmap_destroy(time_format_image);
+  time_format_image = NULL;	
+	
+  layer_remove_from_parent(bitmap_layer_get_layer(day_layer));
+  bitmap_layer_destroy(day_layer);
+  gbitmap_destroy(day_image);
 		
+	layer_remove_from_parent(bitmap_layer_get_layer(layer_quiettime));
+    bitmap_layer_destroy(layer_quiettime);
+    gbitmap_destroy(bitmap_quiettime);
+    bitmap_quiettime = NULL;
+	
   layer_remove_from_parent(bitmap_layer_get_layer(layer_batt_img));
   bitmap_layer_destroy(layer_batt_img);
   gbitmap_destroy(img_battery_1);

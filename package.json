@@ -4,12 +4,13 @@
         "pebble-clay": "^1.0.2"
     },
     "keywords": [],
-    "name": "casio_ediface",
+    "name": "ediface_eqb500",
     "pebble": {
         "capabilities": [
-            "configurable"
+            "configurable",
+            "health"
         ],
-        "displayName": "casio_ediface",
+        "displayName": "Ediface_EQB500",
         "enableMultiJS": true,
         "messageKeys": [
             "hrcol",
@@ -18,12 +19,104 @@
             "date",
             "seccol",
             "batt",
-            "secs",
-            "background"
+            "secs"
         ],
         "projectType": "native",
         "resources": {
             "media": [
+                {
+                    "file": "fonts/font mini2",
+                    "name": "FONT_MINI_12",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/font mini",
+                    "name": "FONT_MINI_14",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 1,
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/font mini",
+                    "name": "FONT_MINI_16",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 1,
+                    "type": "font"
+                },
+                {
+                    "file": "images/numsteps",
+                    "name": "IMAGE_NUMSTEPS",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/fri",
+                    "name": "IMAGE_DAY_NAME_FRI",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_BATT_9",
+                    "name": "IMAGE_BATT_9",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_BATT_10",
+                    "name": "IMAGE_BATT_10",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/shoe",
+                    "name": "IMAGE_SHOE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/menu.png",
+                    "menuIcon": true,
+                    "name": "MENU_IMAGE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/wed",
+                    "name": "IMAGE_DAY_NAME_WED",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tue",
+                    "name": "IMAGE_DAY_NAME_TUE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/thu",
+                    "name": "IMAGE_DAY_NAME_THU",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sun",
+                    "name": "IMAGE_DAY_NAME_SUN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sat",
+                    "name": "IMAGE_DAY_NAME_SAT",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/mon",
+                    "name": "IMAGE_DAY_NAME_MON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
                 {
                     "file": "images/airplanemodeicon.png",
                     "name": "IMAGE_PLANE",
@@ -34,20 +127,9 @@
                     "file": "images/bg",
                     "name": "IMAGE_BACKGROUND",
                     "targetPlatforms": [
+                        "basalt",
                         "chalk"
                     ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/ediface2batt90.png",
-                    "name": "IMAGE_BATT_9",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/ediface2batt100.png",
-                    "name": "IMAGE_BATT_10",
-                    "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
@@ -59,12 +141,6 @@
                 {
                     "file": "images/ediface-am.png",
                     "name": "IMAGE_AM_MODE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/timelessmenu.png",
-                    "name": "MENU_IMAGE",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
@@ -202,56 +278,15 @@
                     "name": "IMAGE_DATENUM_0",
                     "targetPlatforms": null,
                     "type": "bitmap"
-                },
-                {
-                    "file": "images/mon-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_MON",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/tue-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_TUE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/wed-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_WED",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/thu-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_THU",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/fri-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_FRI",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/sat-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_SAT",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/sun-angle-tr.png",
-                    "name": "IMAGE_DAY_NAME_SUN",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
                 }
             ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
+            "basalt",
             "chalk"
         ],
-        "uuid": "ed20099d-a971-4b0e-b08e-6bcef097a5ec",
+        "uuid": "e9ce0cd0-bf8e-410e-8ac5-f477d752984e",
         "watchapp": {
             "watchface": true
         }

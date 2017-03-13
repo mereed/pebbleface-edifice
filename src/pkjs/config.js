@@ -32,24 +32,30 @@ module.exports = [
         "defaultValue": "0xFF0000",
         "label": "Second Hand Colour"
 	  },
-/*	  {
-        "type": "toggle",
-        "messageKey": "day",
-        "label": "Show day",
-        "defaultValue": false
-      },
-	  {
-        "type": "toggle",
-        "messageKey": "date",
-        "label": "Show date",
-        "defaultValue": true
-      },*/
 	  {
         "type": "toggle",
         "messageKey": "secs",
         "label": "Show second hand",
         "defaultValue": true
-      }
+      },
+
+	{
+  "type": "select",
+  "messageKey": "day",
+  "defaultValue": 0,
+  "label": "Dials 2 & 3",
+  "options": [
+
+    { 
+      "label": "Step num & progress",
+      "value": 0
+    },
+    { 
+      "label": "Time & day of week",
+      "value": 1
+    }
+  ]
+}
 	]		
 },
 
