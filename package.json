@@ -16,14 +16,18 @@
             "hrcol",
             "mincol",
             "day",
-            "date",
             "seccol",
-            "batt",
             "secs"
         ],
         "projectType": "native",
         "resources": {
             "media": [
+                {
+                    "file": "images/plane",
+                    "name": "IMAGE_PLANE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
                 {
                     "file": "fonts/font mini2",
                     "name": "FONT_MINI_12",
@@ -118,12 +122,6 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/airplanemodeicon.png",
-                    "name": "IMAGE_PLANE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
                     "file": "images/bg",
                     "name": "IMAGE_BACKGROUND",
                     "targetPlatforms": [
@@ -213,28 +211,19 @@
                 {
                     "file": "images/angle01tr.png",
                     "name": "IMAGE_DATENUM_1",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
+                    "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/angle02tr.png",
                     "name": "IMAGE_DATENUM_2",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
+                    "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/angle03tr.png",
                     "name": "IMAGE_DATENUM_3",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
+                    "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
@@ -291,5 +280,5 @@
             "watchface": true
         }
     },
-    "version": "1.0.0"
+    "version": "1.1.0"
 }

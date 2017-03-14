@@ -9,8 +9,6 @@ typedef struct ClaySettings {
   GColor hrcol;
   GColor mincol;
   GColor seccol;
-  bool date;
-  bool batt;
   bool secs;
 } __attribute__((__packed__)) ClaySettings;
 

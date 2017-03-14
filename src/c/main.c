@@ -1,3 +1,21 @@
+/*
+
+Copyright (C) 2017 Mark Reed
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
+to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-------------------------------------------------------------------
+
+*/
+
 #include <pebble.h>
 #include "main.h"
 #include "hands.h"
@@ -9,15 +27,12 @@ Window* window;
 //LAYER
 Layer* layer;
 
-//static Layer *window_layer;
-
 //BACKGROUND
 static GBitmap* background;
 static BitmapLayer *background_layer; 
 
 //SETTINGS
 bool seconds = true;
-bool date = true;
 
 TextLayer *layer_time_text;
 
@@ -87,6 +102,7 @@ const int DAY_NAME_IMAGE_RESOURCE_IDS[] = {
   RESOURCE_ID_IMAGE_DAY_NAME_FRI,
   RESOURCE_ID_IMAGE_DAY_NAME_SAT
 };
+
 // A struct for our specific settings (see main.h)
 ClaySettings settings;
 
@@ -102,6 +118,8 @@ static int s_step_count = 0, s_step_goal = 0, s_step_average = 0;
 
 GColor color_loser;
 GColor color_winner;
+
+
 
 // Is step data available?
 bool step_data_is_available() {
@@ -193,7 +211,6 @@ static void average_layer_update_proc(Layer *layer, GContext *ctx) {
 
 // Initialize the default settings
 static void prv_default_settings() {	
-  settings.date = true;
   settings.secs = true;
   settings.day = 1;
   settings.hrcol = GColorWhite;
@@ -258,7 +275,7 @@ void update_layer(Layer *me, GContext* ctx)
 {
 //watchface drawing
 		
-	//get tick_time
+//get tick_time
 	time_t temp = time(NULL); 
   	struct tm *tick_time = localtime(&temp);
 	
@@ -286,17 +303,18 @@ void update_layer(Layer *me, GContext* ctx)
   graphics_context_set_stroke_width(ctx, 2);
   graphics_context_set_antialiased(ctx, ANTIALIASING);
 
-	// minute hand
+// minute hand
 	graphics_context_set_stroke_color(ctx, settings.mincol);
 	gpath_rotate_to(s_minute_arrow, TRIG_MAX_ANGLE * tick_time->tm_min / 60);
 	gpath_draw_outline(ctx, s_minute_arrow);
 
-	// hour hand
+// hour hand
 	graphics_context_set_stroke_color(ctx, settings.hrcol);
 	gpath_rotate_to(s_hour_arrow, (TRIG_MAX_ANGLE * (((tick_time->tm_hour % 12) * 6) + (tick_time->tm_min / 10))) / (12 * 6)); // from Pebble SDK example
 	gpath_draw_outline(ctx, s_hour_arrow);
 	
-    graphics_context_set_fill_color(ctx, GColorBlack);
+// center circles
+	graphics_context_set_fill_color(ctx, GColorBlack);
 	graphics_fill_circle(ctx, center, 6);
 	graphics_context_set_fill_color(ctx, GColorWhite);
 	graphics_fill_circle(ctx, center, 4);
@@ -376,22 +394,10 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.day = stringToInt((char*) day_t->value->data);
   }
 	
- // date
-  Tuple *date_t = dict_find(iter, MESSAGE_KEY_date);
-  if (date_t) {
-    settings.date = date_t->value->int32 == 1;
-  }
-	
 // secs
   Tuple *secs_t = dict_find(iter, MESSAGE_KEY_secs);
   if (secs_t) {
     settings.secs = secs_t->value->int32 == 1;
-  }
-
- // batt
-  Tuple *batt_t = dict_find(iter, MESSAGE_KEY_batt);
-  if (batt_t) {
-    settings.batt = batt_t->value->int32 == 1;
   }
 	
  // Hour hand Color
@@ -466,7 +472,7 @@ void tick(struct tm *tick_time, TimeUnits units_changed) {
 
      layer_set_hidden(bitmap_layer_get_layer(layer_quiettime), !quiet_time_is_active());
 
-	//redraw every tick
+//redraw hands every tick
 	layer_mark_dirty(layer);
 	
 	 if (units_changed & HOUR_UNIT) {
@@ -475,16 +481,13 @@ void tick(struct tm *tick_time, TimeUnits units_changed) {
 		   static char time_buffer[] = "00:00";
 		 
 //get digital time
-	
 	 if (clock_is_24h_style()) {
 		   strftime(time_buffer, 8, "%R", tick_time);
     } else {
 		   strftime(time_buffer, 8, "%l:%M", tick_time);
     }	 
-  text_layer_set_text(layer_time_text, time_buffer);
-		 	 
+  text_layer_set_text(layer_time_text, time_buffer);		 	 
   }
-
 
 void init() {
 	
@@ -493,21 +496,21 @@ void init() {
   color_loser = GColorRed;
   color_winner = GColorWhite;
 
-  // Listen for AppMessages
+// Listen for AppMessages
   app_message_register_inbox_received(prv_inbox_received_handler);
   app_message_open(128, 128);
 
-  // international support
+// international support
   setlocale(LC_ALL, "");
 	
-	//create window
-	window = window_create();
-	window_set_background_color(window,GColorBlack);
-	window_stack_push(window, true);
-	Layer* window_layer = window_get_root_layer(window);	
-	GRect bounds = layer_get_bounds(window_layer);
+//create window
+  window = window_create();
+  window_set_background_color(window,GColorBlack);
+  window_stack_push(window, true);
+  Layer* window_layer = window_get_root_layer(window);	
+  GRect bounds = layer_get_bounds(window_layer);
 
-  //background
+//background
   background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BACKGROUND);
   background_layer = bitmap_layer_create(bounds);
   bitmap_layer_set_bitmap(background_layer, background);
@@ -558,7 +561,6 @@ void init() {
   bluetoothp_layer = bitmap_layer_create(frame_btp);
   bitmap_layer_set_bitmap(bluetoothp_layer, bluetoothp_image);
   layer_add_child(window_layer, bitmap_layer_get_layer(bluetoothp_layer));
- // layer_set_hidden(bitmap_layer_get_layer(bluetoothp_layer), true);
 	
   GRect dummy_frame = { {0, 0}, {0, 0} };	
 	
@@ -585,7 +587,7 @@ void init() {
 #if PBL_PLATFORM_CHALK	
   layer_quiettime = bitmap_layer_create(GRect(123,39, 19,15));
 #else
-  layer_quiettime = bitmap_layer_create(GRect(104,33, 19,15));
+  layer_quiettime = bitmap_layer_create(GRect(104,35, 19,15));
 #endif
   bitmap_layer_set_bitmap(layer_quiettime,bitmap_quiettime);
   layer_add_child(window_layer,bitmap_layer_get_layer(layer_quiettime));
@@ -613,7 +615,7 @@ void init() {
   bitmap_layer_set_bitmap(stepnum_layer, stepnum_image);
   layer_add_child(window_layer, bitmap_layer_get_layer(stepnum_layer));	
 	
-  // Steps Progress indicator
+// Steps Progress indicator
 #if PBL_PLATFORM_CHALK	
   s_progress_layer = layer_create(GRect(29,64,53,53));
 #else
@@ -622,7 +624,7 @@ void init() {
   layer_set_update_proc(s_progress_layer, progress_layer_update_proc);
   layer_add_child(window_layer, s_progress_layer);
 
-  // Steps Average indicator
+// Steps Average indicator
 #if PBL_PLATFORM_CHALK	
   s_average_layer = layer_create(GRect(29,64,53,53));
 #else
@@ -632,7 +634,7 @@ void init() {
   layer_add_child(window_layer, s_average_layer);
 
 
-  // Create a layer to hold the current step count text
+// Create a layer to hold the current step count text
 #if PBL_PLATFORM_CHALK	
   s_step_layer = text_layer_create(GRect(0, 45, 180, 20));
 #else
@@ -641,7 +643,6 @@ void init() {
   text_layer_set_background_color(s_step_layer, GColorClear);
   text_layer_set_text_color(s_step_layer, GColorWhite);
   text_layer_set_font(s_step_layer,mini2);
-//  text_layer_set_font(s_step_layer,fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
   text_layer_set_text_alignment(s_step_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_step_layer));
 
@@ -658,19 +659,19 @@ void init() {
   layer_add_child(window_layer, text_layer_get_layer(layer_time_text));
 
 	
-	//create hands layer
+//create hands layer
 #if PBL_PLATFORM_CHALK	
-	layer = layer_create(GRect(0,0,180,180));
+  layer = layer_create(GRect(0,0,180,180));
 #else
-	layer = layer_create(GRect(0,0,144,168));
+  layer = layer_create(GRect(0,0,144,168));
 #endif
-	layer_set_update_proc(layer, update_layer);
-	layer_add_child(window_layer, layer);	
+  layer_set_update_proc(layer, update_layer);
+  layer_add_child(window_layer, layer);	
 	
 	
 	prv_update_display();
 
-	// Subscribe to health events if we can
+// Subscribe to health events if we can
   if(step_data_is_available()) {
     health_service_events_subscribe(health_handler, NULL);
   }
@@ -678,10 +679,10 @@ void init() {
   toggle_bluetooth_icon(bluetooth_connection_service_peek());
   update_battery_state(battery_state_service_peek());
 
-  //subscribe to seconds tick event
+//subscribe events
   tick_timer_service_subscribe(MINUTE_UNIT, tick);
-	bluetooth_connection_service_subscribe(bluetooth_connection_callback);
-    battery_state_service_subscribe(&update_battery_state);
+  bluetooth_connection_service_subscribe(bluetooth_connection_callback);
+  battery_state_service_subscribe(&update_battery_state);
 	
 // init hand paths
   s_second_arrow = gpath_create(&SECOND_HAND_POINTS);
@@ -693,13 +694,13 @@ void init() {
   gpath_move_to(s_hour_arrow, center);
 	
 	
-	// Avoids a blank screen on watch start.
+// Avoids a blank screen on watch start.
   time_t now = time(NULL);
   struct tm *tick_time = localtime(&now);  
   tick(tick_time, DAY_UNIT + HOUR_UNIT + MINUTE_UNIT);
 	
-    update_battery_state(battery_state_service_peek());
-    toggle_bluetooth_icon(bluetooth_connection_service_peek());
+ update_battery_state(battery_state_service_peek());
+ toggle_bluetooth_icon(bluetooth_connection_service_peek());
 
 }
 
@@ -755,10 +756,10 @@ static void deinit(void) {
   bitmap_layer_destroy(day_layer);
   gbitmap_destroy(day_image);
 		
-	layer_remove_from_parent(bitmap_layer_get_layer(layer_quiettime));
-    bitmap_layer_destroy(layer_quiettime);
-    gbitmap_destroy(bitmap_quiettime);
-    bitmap_quiettime = NULL;
+ layer_remove_from_parent(bitmap_layer_get_layer(layer_quiettime));
+ bitmap_layer_destroy(layer_quiettime);
+ gbitmap_destroy(bitmap_quiettime);
+ bitmap_quiettime = NULL;
 	
   layer_remove_from_parent(bitmap_layer_get_layer(layer_batt_img));
   bitmap_layer_destroy(layer_batt_img);

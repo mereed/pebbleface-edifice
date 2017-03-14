@@ -18,19 +18,19 @@ module.exports = [
         "type": "color",
         "messageKey": "hrcol",
         "defaultValue": "0xFFFFFF",
-        "label": "Hour Hand Color"
+        "label": "HOUR Hand Color"
       },
       {
         "type": "color",
         "messageKey": "mincol",
         "defaultValue": "0xFFFFFF",
-        "label": "Minute Hand Colour"
+        "label": "MINUTE Hand Colour"
       },
       {
         "type": "color",
         "messageKey": "seccol",
         "defaultValue": "0xFF0000",
-        "label": "Second Hand Colour"
+        "label": "SECOND Hand Colour"
 	  },
 	  {
         "type": "toggle",
@@ -38,12 +38,11 @@ module.exports = [
         "label": "Show second hand",
         "defaultValue": true
       },
-
 	{
   "type": "select",
   "messageKey": "day",
   "defaultValue": 0,
-  "label": "Dials 2 & 3",
+  "label": "Complications",
   "options": [
 
     { 
@@ -56,9 +55,8 @@ module.exports = [
     }
   ]
 }
-	]		
+]		
 },
-
   {
         "type": "text",
         "defaultValue": "<h6>If you find this watchface useful, please consider making a <a href='https://www.paypal.me/markchopsreed'>small donation here</a>. Thankyou.</h6>",
